@@ -4,8 +4,11 @@ import { withPayload } from "@payloadcms/next/withPayload";
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    // Cloudinary sizes and re-encodes its own images; everything else falls
+    // through to Next's optimizer. See lib/cloudinary-loader.ts.
+    loader: "custom",
+    loaderFile: "./lib/cloudinary-loader.ts",
     remotePatterns: [
-      // Uploads are delivered from Cloudinary's CDN.
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
     ],
   },

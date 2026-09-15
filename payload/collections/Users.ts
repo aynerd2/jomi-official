@@ -9,6 +9,22 @@ export const Users: CollectionConfig = {
     maxLoginAttempts: 5,
     lockTime: 10 * 60 * 1000,
   },
+  hooks: {
+    beforeValidate: [
+      async ({ data, req, operation }) => {
+        if (operation !== "create" || !data) return data;
+
+        // The very first account must be a super-admin. The create-first-user
+        // screen shows the role selector with its usual default, and picking
+        // Editor there would leave nobody able to manage accounts at all.
+        const { totalDocs } = await req.payload.count({ collection: "users" });
+        if (totalDocs === 0) {
+          return { ...data, role: "super-admin" };
+        }
+        return data;
+      },
+    ],
+  },
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "email", "role"],

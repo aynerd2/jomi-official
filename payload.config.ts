@@ -83,7 +83,17 @@ export default buildConfig({
       ? [
           cloudStoragePlugin({
             collections: {
-              media: { adapter: cloudinaryAdapter(), disableLocalStorage: true },
+              media: {
+                adapter: cloudinaryAdapter(),
+                disableLocalStorage: true,
+                // Serve straight from Cloudinary's CDN rather than proxying
+                // every image through this app. Without this the plugin stores
+                // a /api/media/file/... URL so Payload can apply access control
+                // to the bytes, which only makes sense for private files. Media
+                // here is public, and the point of Cloudinary is its CDN and
+                // its per-browser format and quality.
+                disablePayloadAccessControl: true,
+              },
             },
           }),
         ]
