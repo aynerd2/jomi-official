@@ -52,6 +52,15 @@ export default buildConfig({
     meta: {
       titleSuffix: " · JOMI Admin",
     },
+    components: {
+      graphics: {
+        Logo: "@/components/admin/Logo#Logo",
+        Icon: "@/components/admin/Icon#Icon",
+      },
+      // Payload's own sign-out is an unlabelled icon; these are the same
+      // destinations, with words on them.
+      afterNavLinks: ["@/components/admin/AccountLinks#AccountLinks"],
+    },
   },
 
   collections: [
