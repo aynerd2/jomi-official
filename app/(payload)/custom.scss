@@ -1,26 +1,34 @@
 /**
  * JOMI admin theme.
  *
- * Payload's own components are left alone; this only re-points the design
- * tokens they already read, so upgrades do not fight a fork. The two things
- * worth knowing:
+ * Payload's components are not forked. This re-points the design tokens they
+ * already read and restyles the shell around them, all inside the `payload`
+ * layer, which is declared after `payload-default` and so wins without
+ * !important.
  *
- *   --theme-elevation-0..1000 is the neutral ramp the whole panel is built on
- *     (0 = page background, 800 = body text). Tinting it towards navy makes the
- *     chrome feel like the site without touching contrast.
- *   --bg-color / --color drive buttons, so the primary action becomes gold with
- *     navy text, exactly as on the public site.
+ * Worth knowing before editing:
  *
- * Everything sits in the `payload` layer, which is defined after
- * `payload-default`, so these win without !important.
+ *   - Payload sets `html { font-size: 13px }` and derives spacing from
+ *     `--base: calc((--base-px / --base-body-size) * 1rem)`. Raising the root
+ *     size scales every rem-based measurement at once, which is the single
+ *     biggest lever on density.
+ *   - Its SCSS also compiles a `base()` helper to fixed pixels, so type sizes
+ *     do not follow the root size. Those are set explicitly below.
+ *   - `--theme-elevation-0..1000` is the neutral ramp the whole panel is built
+ *     from (0 = page, 800 = body text); `--color-base-*` feeds it.
  */
 
 @layer payload {
+  /* ====================================================================== */
+  /* Tokens                                                                 */
+  /* ====================================================================== */
+
   :root {
     /* Brand */
     --jomi-gold-50: #fffbf0;
     --jomi-gold-100: #fff2d4;
     --jomi-gold-200: #ffe083;
+    --jomi-gold-300: #ffcb44;
     --jomi-gold-400: #f7b22c;
     --jomi-gold-500: #ec9d01;
     --jomi-gold-600: #c98500;
@@ -28,22 +36,50 @@
     --jomi-navy-50: #f2f5fa;
     --jomi-navy-100: #e2e9f3;
     --jomi-navy-200: #c6d3e7;
+    --jomi-navy-300: #9bb2d3;
+    --jomi-navy-600: #365286;
     --jomi-navy-700: #2c426d;
     --jomi-navy-800: #22334f;
     --jomi-navy-900: #141d2e;
+    --jomi-navy-950: #0b111c;
 
-    /* The same typefaces as the public site. */
+    /* The public site's typefaces, injected as custom properties by the
+       (payload) layout, since RootLayout owns <html>. */
     --font-body: var(--font-admin-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-serif: var(--font-admin-display), Georgia, serif;
 
-    /* A little softer than Payload's default. */
-    --style-radius-s: 4px;
-    --style-radius-m: 8px;
-    --style-radius-l: 12px;
+    --style-radius-s: 5px;
+    --style-radius-m: 9px;
+    --style-radius-l: 14px;
+
+    /* Room to breathe: a wider sidebar and a larger page gutter. */
+    --nav-width: 310px;
+    --gutter-h: 2.4rem;
+
+    --jomi-shadow-card: 0 1px 2px rgba(20, 29, 46, 0.04), 0 8px 24px rgba(20, 29, 46, 0.06);
+    --jomi-shadow-lift: 0 12px 32px rgba(20, 29, 46, 0.12);
   }
 
-  /* Neutral ramp, tinted towards navy rather than flat grey. Kept close to the
-     original lightness at each step so contrast ratios hold. */
+  /* The root size drives every rem in the panel. 13px is Payload's default and
+     is what makes it feel cramped. */
+  html {
+    font-size: 15px;
+  }
+
+  @media (min-width: 1600px) {
+    html {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    html {
+      font-size: 14px;
+    }
+  }
+
+  /* Neutral ramp, tinted towards the brand navy rather than flat grey. Each
+     step keeps roughly its original lightness, so contrast ratios hold. */
   html[data-theme='light'] {
     --color-base-0: #ffffff;
     --color-base-50: #f7f9fc;
@@ -67,15 +103,197 @@
     --color-base-950: #0f1725;
     --color-base-1000: #0b111c;
 
-    --theme-success-500: var(--jomi-gold-500);
+    --theme-bg: #fbfcfe;
+    --theme-input-bg: #ffffff;
+
+    /* Payload uses the success ramp for selection and some accents. */
+    --color-success-250: var(--jomi-gold-200);
+    --color-success-500: var(--jomi-gold-500);
   }
 
-  /* Dark mode: Payload flips the ramp itself, so only the accent needs saying. */
   html[data-theme='dark'] {
-    --theme-success-500: var(--jomi-gold-400);
+    --color-success-500: var(--jomi-gold-400);
+    --theme-bg: var(--jomi-navy-950);
   }
 
-  /* --- Primary action: gold, with navy text for contrast ------------------ */
+  /* ====================================================================== */
+  /* Typography                                                             */
+  /* ====================================================================== */
+
+  body {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    letter-spacing: -0.005em;
+  }
+
+  /* Headings in the display serif, as on the public site. */
+  h1,
+  h2,
+  h3,
+  h4,
+  .step-nav,
+  .doc-header__title,
+  .list-header h1,
+  .dashboard__label {
+    font-family: var(--font-serif);
+    letter-spacing: -0.015em;
+  }
+
+  h1 {
+    font-size: 1.85rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  /* Form labels, table headers and the other small text Payload sets in a
+     cramped 11-12px. */
+  .field-label,
+  .table thead th,
+  .doc-tabs__tab,
+  .pill,
+  .nav__link,
+  .btn {
+    font-size: 0.9rem;
+  }
+
+  .field-label {
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    margin-bottom: 0.4rem;
+  }
+
+  .field-description,
+  .tooltip,
+  .field-error-message {
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  input,
+  textarea,
+  select,
+  .rs__control {
+    font-size: 0.95rem !important;
+  }
+
+  /* ====================================================================== */
+  /* Density                                                                */
+  /* ====================================================================== */
+
+  .field-type {
+    margin-bottom: 1.5rem;
+  }
+
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='number'],
+  textarea,
+  .rs__control {
+    border-radius: var(--style-radius-m);
+    padding-block: 0.65rem;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  input:focus,
+  textarea:focus,
+  .rs__control--is-focused {
+    border-color: var(--jomi-gold-500) !important;
+    box-shadow: 0 0 0 3px rgba(236, 157, 1, 0.15) !important;
+  }
+
+  /* Tables: taller rows, quieter rules, clearer headers. */
+  .table {
+    thead th {
+      color: var(--theme-elevation-500);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding-block: 0.85rem;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+
+    td {
+      padding-block: 0.95rem;
+    }
+
+    tbody tr {
+      transition: background-color 120ms ease;
+
+      &:hover {
+        background-color: var(--jomi-navy-50);
+      }
+    }
+  }
+
+  /* ====================================================================== */
+  /* Navigation                                                             */
+  /* ====================================================================== */
+
+  .nav {
+    background-color: #ffffff;
+    border-inline-end: 1px solid var(--theme-elevation-100);
+
+    .nav__link {
+      border-radius: var(--style-radius-m);
+      font-weight: 500;
+      margin-inline: 0.5rem;
+      padding-block: 0.6rem;
+      padding-inline: 0.75rem;
+      transition:
+        background-color 140ms ease,
+        color 140ms ease;
+
+      &:hover {
+        background-color: var(--jomi-navy-50);
+        color: var(--theme-elevation-1000);
+      }
+
+      &--active {
+        background-color: var(--jomi-gold-50);
+        box-shadow: inset 3px 0 0 var(--jomi-gold-500);
+        color: var(--jomi-navy-900);
+        font-weight: 600;
+      }
+    }
+
+    .nav__group-label {
+      color: var(--theme-elevation-450);
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding-inline: 1.25rem;
+      text-transform: uppercase;
+    }
+  }
+
+  .app-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--theme-elevation-100);
+  }
+
+  /* ====================================================================== */
+  /* Buttons and accents                                                    */
+  /* ====================================================================== */
 
   .btn--style-primary {
     --bg-color: var(--jomi-gold-500);
@@ -83,6 +301,7 @@
     --hover-bg: var(--jomi-gold-400);
     --hover-color: var(--jomi-navy-900);
 
+    border-radius: var(--style-radius-m);
     font-weight: 600;
     transition:
       background-color 160ms ease,
@@ -90,8 +309,8 @@
       box-shadow 160ms ease;
 
     &:hover {
+      box-shadow: 0 6px 18px rgba(236, 157, 1, 0.28);
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(236, 157, 1, 0.24);
     }
 
     &:active {
@@ -100,95 +319,46 @@
   }
 
   .btn--style-secondary {
+    border-radius: var(--style-radius-m);
     transition:
       border-color 160ms ease,
-      background-color 160ms ease;
-  }
+      background-color 160ms ease,
+      color 160ms ease;
 
-  /* --- Navigation --------------------------------------------------------- */
-
-  .nav {
-    --nav-bg: var(--theme-elevation-50);
-
-    .nav__link {
-      border-radius: var(--style-radius-m);
-      transition:
-        background-color 140ms ease,
-        color 140ms ease,
-        padding-inline-start 140ms ease;
-
-      &:hover {
-        background-color: var(--theme-elevation-100);
-        color: var(--theme-elevation-1000);
-      }
-
-      /* The current section, marked in gold rather than by weight alone. */
-      &--active {
-        background-color: var(--jomi-gold-50);
-        box-shadow: inset 3px 0 0 var(--jomi-gold-500);
-        color: var(--theme-elevation-1000);
-        font-weight: 600;
-      }
-    }
-
-    .nav__group-label {
-      color: var(--theme-elevation-500);
-      font-size: 0.6875rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    &:hover {
+      border-color: var(--jomi-navy-900);
     }
   }
 
-  /* --- Focus and links ---------------------------------------------------- */
+  a:not(.btn):not(.nav__link) {
+    color: var(--jomi-navy-700);
+    text-decoration-color: var(--jomi-gold-300);
+    text-underline-offset: 2px;
 
-  :where(a, button, input, select, textarea):focus-visible {
+    &:hover {
+      color: var(--jomi-gold-700);
+    }
+  }
+
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid var(--jomi-gold-600);
     outline-offset: 2px;
   }
 
   .doc-tabs__tab--active {
     box-shadow: inset 0 -2px 0 var(--jomi-gold-500);
+    font-weight: 600;
   }
 
-  /* --- Login and first-user screens --------------------------------------- */
-
-  .login,
-  .create-first-user {
-    background:
-      radial-gradient(circle at 15% 15%, rgba(236, 157, 1, 0.08) 0%, transparent 45%),
-      radial-gradient(circle at 85% 80%, rgba(20, 29, 46, 0.06) 0%, transparent 45%);
+  .pill {
+    border-radius: 999px;
   }
 
-  .login__brand,
-  .login__wrap {
-    animation: jomi-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  @keyframes jomi-rise {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* --- Tables and cards --------------------------------------------------- */
-
-  .table {
-    tbody tr {
-      transition: background-color 120ms ease;
-
-      &:hover {
-        background-color: var(--theme-elevation-50);
-      }
-    }
-  }
-
+  /* Cards on the dashboard home. */
   .card {
+    border-radius: var(--style-radius-l);
+    box-shadow: var(--jomi-shadow-card);
+    padding: 1.25rem;
     transition:
       border-color 160ms ease,
       box-shadow 160ms ease,
@@ -196,20 +366,97 @@
 
     &:hover {
       border-color: var(--jomi-gold-200);
-      box-shadow: 0 8px 20px rgba(20, 29, 46, 0.08);
+      box-shadow: var(--jomi-shadow-lift);
       transform: translateY(-2px);
+    }
+
+    .card__title {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
     }
   }
 
-  /* Anyone who prefers less movement gets none of it. */
+  .dashboard__group {
+    margin-bottom: 2.5rem;
+  }
+
+  /* ====================================================================== */
+  /* Login                                                                  */
+  /* ====================================================================== */
+
+  .login {
+    background:
+      radial-gradient(circle at 12% 18%, rgba(236, 157, 1, 0.16) 0%, transparent 42%),
+      radial-gradient(circle at 88% 82%, rgba(71, 106, 161, 0.18) 0%, transparent 46%),
+      linear-gradient(160deg, var(--jomi-navy-900) 0%, var(--jomi-navy-800) 55%, var(--jomi-navy-950) 100%);
+    min-height: 100vh;
+
+    /* A thin gold rule across the very top, echoing the site's dividers. */
+    &::before {
+      background: linear-gradient(90deg, var(--jomi-gold-500), var(--jomi-gold-300), var(--jomi-gold-500));
+      content: '';
+      inset-block-start: 0;
+      inset-inline: 0;
+      height: 3px;
+      position: fixed;
+      z-index: 2;
+    }
+
+    .template-minimal__wrap {
+      animation: jomi-rise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      background: #ffffff;
+      border-radius: var(--style-radius-l);
+      box-shadow: 0 24px 60px rgba(5, 8, 15, 0.45);
+      max-width: 27rem;
+      padding: 2.75rem 2.5rem 2.5rem;
+      width: 100%;
+    }
+
+    .login__brand {
+      border-bottom: 1px solid var(--theme-elevation-100);
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.5rem;
+    }
+
+    .field-label {
+      color: var(--jomi-navy-800);
+    }
+
+    .form-submit .btn {
+      width: 100%;
+    }
+
+    /* "Forgot password" reads as a quiet aside, not a second action. */
+    > .template-minimal__wrap > form > a {
+      color: var(--theme-elevation-500);
+      display: inline-block;
+      font-size: 0.85rem;
+      margin-block: 0.25rem 1.25rem;
+    }
+  }
+
+  @keyframes jomi-rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ====================================================================== */
+  /* Motion preferences                                                     */
+  /* ====================================================================== */
+
   @media (prefers-reduced-motion: reduce) {
     .btn--style-primary:hover,
     .card:hover {
       transform: none;
     }
 
-    .login__brand,
-    .login__wrap {
+    .login .template-minimal__wrap {
       animation: none;
     }
   }

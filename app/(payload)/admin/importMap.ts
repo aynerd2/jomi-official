@@ -9,10 +9,12 @@
  */
 import { AccountLinks } from "@/components/admin/AccountLinks";
 import { Icon } from "@/components/admin/Icon";
+import { LoginIntro } from "@/components/admin/LoginIntro";
 import { Logo } from "@/components/admin/Logo";
 
 export const importMap = {
   "@/components/admin/Logo#Logo": Logo,
   "@/components/admin/Icon#Icon": Icon,
   "@/components/admin/AccountLinks#AccountLinks": AccountLinks,
+  "@/components/admin/LoginIntro#LoginIntro": LoginIntro,
 };

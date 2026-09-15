@@ -51,6 +51,11 @@ export default buildConfig({
     importMap: { baseDir: dirname },
     meta: {
       titleSuffix: " · JOMI Admin",
+      description: "Content dashboard for Jide Ojo Ministry International.",
+      icons: [
+        { rel: "icon", type: "image/png", sizes: "32x32", url: "/favicon-32.png" },
+        { rel: "apple-touch-icon", sizes: "180x180", url: "/apple-icon.png" },
+      ],
     },
     components: {
       graphics: {
@@ -60,6 +65,7 @@ export default buildConfig({
       // Payload's own sign-out is an unlabelled icon; these are the same
       // destinations, with words on them.
       afterNavLinks: ["@/components/admin/AccountLinks#AccountLinks"],
+      beforeLogin: ["@/components/admin/LoginIntro#LoginIntro"],
     },
   },
 
