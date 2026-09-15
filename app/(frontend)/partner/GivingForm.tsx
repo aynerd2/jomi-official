@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
-import { initialFormState } from "../actions";
+import { initialFormState } from "@/lib/form-state";
 import { startGiving } from "../giving-actions";
 
 type Props = {

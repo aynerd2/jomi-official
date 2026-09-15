@@ -28,7 +28,14 @@ type LoaderArgs = {
 const CLOUDINARY_HOST = "res.cloudinary.com";
 
 export default function cloudinaryLoader({ src, width, quality }: LoaderArgs): string {
-  if (!src.includes(CLOUDINARY_HOST)) return src;
+  if (!src.includes(CLOUDINARY_HOST)) {
+    // The file is served as-is, but the URL still has to vary by width or Next
+    // warns that the loader ignores it. The static file server ignores the
+    // query, and these assets are immutable and already compressed, so every
+    // srcset entry resolving to the same file is the intended behaviour.
+    const separator = src.includes("?") ? "&" : "?";
+    return `${src}${separator}w=${width}`;
+  }
 
   const [base, rest] = src.split("/upload/");
   if (!rest) return src;

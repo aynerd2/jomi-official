@@ -1,6 +1,7 @@
 "use server";
 
 import { cmsEnabled, getPayloadClient } from "@/lib/payload";
+import type { FormState } from "@/lib/form-state";
 
 /**
  * Form handling for the public site.
@@ -11,13 +12,6 @@ import { cmsEnabled, getPayloadClient } from "@/lib/payload";
  *
  * Nothing is emailed: submissions are worked through in the dashboard.
  */
-
-export type FormState = {
-  status: "idle" | "success" | "error";
-  message: string;
-};
-
-export const initialFormState: FormState = { status: "idle", message: "" };
 
 const NOT_CONNECTED: FormState = {
   status: "error",

@@ -9,7 +9,7 @@ import {
   paystackConfigured,
 } from "@/lib/paystack";
 
-import type { FormState } from "./actions";
+import type { FormState } from "@/lib/form-state";
 
 /**
  * Starts a gift.

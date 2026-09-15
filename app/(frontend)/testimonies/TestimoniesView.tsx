@@ -2,7 +2,8 @@
 
 import { useActionState, useEffect, useState } from "react";
 
-import { initialFormState, submitTestimony } from "@/app/(frontend)/actions";
+import { submitTestimony } from "@/app/(frontend)/actions";
+import { initialFormState } from "@/lib/form-state";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Globe, Heart, Quote, Send, X } from "lucide-react";

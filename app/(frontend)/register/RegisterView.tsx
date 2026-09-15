@@ -2,7 +2,8 @@
 
 import { Suspense, useActionState } from "react";
 
-import { initialFormState, submitRegistration } from "@/app/(frontend)/actions";
+import { submitRegistration } from "@/app/(frontend)/actions";
+import { initialFormState } from "@/lib/form-state";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CalendarCheck, Send } from "lucide-react";

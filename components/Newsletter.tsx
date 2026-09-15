@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { ArrowRight, Mail } from "lucide-react";
 
-import { initialFormState, submitNewsletter } from "@/app/(frontend)/actions";
+import { submitNewsletter } from "@/app/(frontend)/actions";
+import { initialFormState } from "@/lib/form-state";
 
 import { Section } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";

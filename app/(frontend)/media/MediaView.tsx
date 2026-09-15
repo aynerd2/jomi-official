@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 
-import { initialFormState, submitMessageRequest } from "@/app/(frontend)/actions";
+import { submitMessageRequest } from "@/app/(frontend)/actions";
+import { initialFormState } from "@/lib/form-state";
 import Link from "next/link";
 import {
   ArrowRight,
