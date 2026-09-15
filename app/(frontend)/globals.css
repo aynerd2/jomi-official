@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: theme('colors.surface.DEFAULT');
+    color: theme('colors.ink.800');
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: theme('fontFamily.display');
+    color: theme('colors.navy.900');
+    font-weight: 600;
+  }
+
+  /* A visible focus ring everywhere, for keyboard users. */
+  :focus-visible {
+    outline: 2px solid theme('colors.gold.600');
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: theme('colors.gold.200');
+    color: theme('colors.navy.900');
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8;
+  }
+
+  .section {
+    @apply py-20 md:py-28;
+  }
+
+  /* Small caps label above a section title. */
+  .eyebrow {
+    @apply text-eyebrow font-semibold uppercase tracking-[0.14em] text-gold-600;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-medium
+           transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none;
+  }
+
+  .btn-md {
+    @apply px-7 py-3.5 text-body-sm;
+  }
+
+  .btn-primary {
+    @apply btn btn-md bg-gold-500 text-navy-900 shadow-sm
+           hover:bg-gold-400 hover:shadow-lift hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply btn btn-md border border-navy-200 bg-white text-navy-900
+           hover:border-navy-900 hover:bg-navy-900 hover:text-white hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  /* For use on navy bands. */
+  .btn-inverse {
+    @apply btn btn-md border border-white/25 bg-transparent text-white
+           hover:bg-white hover:text-navy-900 hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-ghost {
+    @apply btn btn-md text-navy-900 hover:text-gold-600;
+  }
+
+  .card {
+    @apply rounded-2xl border border-ink-100 bg-white shadow-card transition-all duration-300;
+  }
+
+  .card-interactive {
+    @apply card hover:-translate-y-1 hover:shadow-lift hover:border-gold-200;
+  }
+
+  .rule {
+    @apply h-px w-16 bg-gold-500;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Scrollbar, tuned to the light palette. */
+  .scrollbar-brand::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  .scrollbar-brand::-webkit-scrollbar-thumb {
+    background: theme('colors.ink.200');
+    border-radius: 6px;
+  }
+}
+
+/* Honour a reduced-motion preference: no travel, no parallax, no autoplay drift. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
