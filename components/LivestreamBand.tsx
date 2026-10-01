@@ -50,13 +50,17 @@ function nextOccurrence(service: ServiceTime): Date | null {
 function useCountdown(target: Date | null) {
   const [remaining, setRemaining] = useState<number | null>(null);
 
+  // Depend on the timestamp, not the Date: the caller builds a new Date every
+  // render, which would otherwise re-run this effect forever.
+  const targetMs = target?.getTime() ?? null;
+
   useEffect(() => {
-    if (!target) return;
-    const tick = () => setRemaining(target.getTime() - Date.now());
+    if (targetMs === null) return;
+    const tick = () => setRemaining(targetMs - Date.now());
     tick();
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [target]);
+  }, [targetMs]);
 
   if (remaining === null || remaining <= 0) return null;
 

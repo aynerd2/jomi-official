@@ -4,6 +4,7 @@ import "./globals.css";
 
 import SiteHeader from "@/components/SiteHeader";
 import Footer from "@/components/Footer";
+import ShepherdWidget from "@/components/shepherd/ShepherdWidget";
 
 // Display: a warm, distinctive serif for headings. Body: Inter for everything else.
 const fraunces = Fraunces({
@@ -57,6 +58,7 @@ export default function RootLayout({
         <SiteHeader />
         {children}
         <Footer />
+        <ShepherdWidget />
       </body>
     </html>
   );

@@ -111,10 +111,30 @@
   }
 }
 
+/* Shepherd launcher: a brand-gold ring that swells and fades, shown only
+   until the visitor first opens the chat. The lift shadow is repeated in
+   every frame because the animation owns box-shadow while it runs. */
+@keyframes shepherd-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(236, 157, 1, 0.55), theme('boxShadow.lift');
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(236, 157, 1, 0), theme('boxShadow.lift');
+  }
+}
+
+.shepherd-launcher-pulse {
+  animation: shepherd-pulse-glow 2s ease-in-out infinite;
+}
+
 /* Honour a reduced-motion preference: no travel, no parallax, no autoplay drift. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .shepherd-launcher-pulse {
+    animation: none;
   }
 
   *,
