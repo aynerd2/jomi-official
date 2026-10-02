@@ -66,6 +66,8 @@ export default buildConfig({
       // destinations, with words on them.
       afterNavLinks: ["@/components/admin/AccountLinks#AccountLinks"],
       beforeLogin: ["@/components/admin/LoginIntro#LoginIntro"],
+      // Greeting, live counts and recent edits above Payload's collection cards.
+      beforeDashboard: ["@/components/admin/DashboardWelcome#DashboardWelcome"],
     },
   },
 

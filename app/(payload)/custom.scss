@@ -281,11 +281,17 @@
       padding-inline: 0.75rem;
       transition:
         background-color 140ms ease,
-        color 140ms ease;
+        color 140ms ease,
+        box-shadow 180ms ease,
+        padding-inline-start 180ms cubic-bezier(0.22, 1, 0.36, 1);
 
+      /* A gold rule grows in and the label nudges across, previewing the
+         active state rather than just tinting the row. */
       &:hover {
         background-color: var(--theme-elevation-50);
+        box-shadow: inset 2px 0 0 var(--jomi-gold-300);
         color: var(--theme-elevation-1000);
+        padding-inline-start: 0.95rem;
       }
 
       &--active {
@@ -463,6 +469,9 @@
       radial-gradient(circle at 12% 18%, rgba(236, 157, 1, 0.16) 0%, transparent 42%),
       radial-gradient(circle at 88% 82%, rgba(71, 106, 161, 0.18) 0%, transparent 46%),
       linear-gradient(160deg, var(--jomi-navy-900) 0%, var(--jomi-navy-800) 55%, var(--jomi-navy-950) 100%);
+    /* Oversized so the glows can drift slowly behind the card. */
+    animation: jomi-drift 22s ease-in-out infinite alternate;
+    background-size: 150% 150%;
     min-height: 100vh;
 
     /* A thin gold rule across the very top, echoing the site's dividers. */
@@ -500,6 +509,24 @@
       width: 100%;
     }
 
+    /* The fields follow the card in, one beat apart. */
+    form .field-type,
+    .form-submit {
+      animation: jomi-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    form .field-type:nth-of-type(1) {
+      animation-delay: 120ms;
+    }
+
+    form .field-type:nth-of-type(2) {
+      animation-delay: 180ms;
+    }
+
+    .form-submit {
+      animation-delay: 240ms;
+    }
+
     /* "Forgot password" reads as a quiet aside, not a second action. */
     > .template-minimal__wrap > form > a {
       color: var(--theme-elevation-500);
@@ -520,6 +547,234 @@
     }
   }
 
+  @keyframes jomi-drift {
+    from {
+      background-position: 0% 0%;
+    }
+    to {
+      background-position: 100% 100%;
+    }
+  }
+
+  /* ====================================================================== */
+  /* Dashboard overview (components/admin/DashboardWelcome)                 */
+  /* ====================================================================== */
+
+  /* Theme tokens for every surface and body text, never brand literals: the
+     panel can be in either theme. Gold is only ever an accent. */
+  .jomi-dash {
+    margin-block: 0.5rem 1.5rem;
+
+    &__hero {
+      margin-bottom: 1.75rem;
+    }
+
+    &__date {
+      color: var(--jomi-gold-600);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      margin: 0 0 0.5rem;
+      text-transform: uppercase;
+    }
+
+    &__title {
+      color: var(--theme-elevation-1000);
+      font-family: var(--font-serif);
+      font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.4rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin: 0;
+    }
+
+    &__lede {
+      color: var(--theme-elevation-500);
+      font-size: 1rem;
+      margin: 0.5rem 0 0;
+    }
+
+    &__stats {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+      list-style: none;
+      margin: 0 0 2rem;
+      padding: 0;
+    }
+
+    &__heading {
+      color: var(--theme-elevation-800);
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 0 0 0.75rem;
+
+      &--content {
+        margin-top: 0.5rem;
+      }
+    }
+
+    &__recent {
+      margin-bottom: 2.25rem;
+    }
+  }
+
+  .jomi-stat {
+    background: var(--theme-elevation-0);
+    border: 1px solid var(--theme-elevation-100);
+    border-radius: var(--style-radius-l);
+    box-shadow: var(--jomi-shadow-card);
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    padding: 1.25rem 1.25rem 1.1rem;
+    position: relative;
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+
+    /* A coloured cap along the top edge marks the kind of figure. */
+    &::before {
+      background: var(--theme-elevation-300);
+      content: '';
+      height: 3px;
+      inset-block-start: 0;
+      inset-inline: 0;
+      position: absolute;
+    }
+
+    &--gold::before {
+      background: var(--jomi-gold-500);
+    }
+
+    &--navy::before {
+      background: var(--jomi-navy-600);
+    }
+
+    &:hover {
+      border-color: var(--jomi-gold-200);
+      box-shadow: var(--jomi-shadow-lift);
+      transform: translateY(-3px);
+    }
+
+    &__value {
+      color: var(--theme-elevation-1000);
+      font-family: var(--font-serif);
+      font-size: 2.4rem;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    &__label {
+      color: var(--theme-elevation-800);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-top: 0.6rem;
+    }
+
+    &__hint {
+      color: var(--theme-elevation-500);
+      font-size: 0.8rem;
+      line-height: 1.45;
+      margin-top: 0.25rem;
+    }
+
+    /* Work waiting: the figure turns gold so it is found at a glance. */
+    &--attention .jomi-stat__value {
+      color: var(--jomi-gold-600);
+    }
+  }
+
+  .jomi-activity {
+    background: var(--theme-elevation-0);
+    border: 1px solid var(--theme-elevation-100);
+    border-radius: var(--style-radius-l);
+    box-shadow: var(--jomi-shadow-card);
+    list-style: none;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+
+    li + li {
+      border-top: 1px solid var(--theme-elevation-100);
+    }
+
+    &__row {
+      align-items: baseline;
+      color: inherit;
+      display: grid;
+      gap: 0.25rem 1rem;
+      grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+      padding: 0.8rem 1.25rem;
+      text-decoration: none;
+      transition: background-color 140ms ease;
+
+      &:hover {
+        background: var(--theme-elevation-50);
+
+        .jomi-activity__title {
+          color: var(--theme-elevation-1000);
+        }
+      }
+    }
+
+    &__kind {
+      color: var(--jomi-gold-600);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    &__title {
+      color: var(--theme-elevation-800);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__time {
+      color: var(--theme-elevation-450);
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .jomi-activity__row {
+      grid-template-columns: minmax(0, 1fr) auto;
+
+      .jomi-activity__kind {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .jomi-stat:hover {
+      border-color: rgba(236, 157, 1, 0.45);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .jomi-stat--navy::before {
+      background: var(--jomi-navy-300);
+    }
+
+    .jomi-dash__date,
+    .jomi-activity__kind,
+    .jomi-stat--attention .jomi-stat__value {
+      color: var(--jomi-gold-400);
+    }
+  }
+
   /* ====================================================================== */
   /* Motion preferences                                                     */
   /* ====================================================================== */
@@ -530,8 +785,19 @@
       transform: none;
     }
 
-    .login .template-minimal__wrap {
+    .login,
+    .login .template-minimal__wrap,
+    .login form .field-type,
+    .login .form-submit {
       animation: none;
+    }
+
+    .jomi-stat:hover {
+      transform: none;
+    }
+
+    .nav .nav__link:hover {
+      padding-inline-start: 0.75rem;
     }
   }
 }

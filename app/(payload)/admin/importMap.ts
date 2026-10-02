@@ -8,6 +8,7 @@
  * "path#export" string from the config as the key.
  */
 import { AccountLinks } from "@/components/admin/AccountLinks";
+import { DashboardWelcome } from "@/components/admin/DashboardWelcome";
 import { Icon } from "@/components/admin/Icon";
 import { LoginIntro } from "@/components/admin/LoginIntro";
 import { Logo } from "@/components/admin/Logo";
@@ -17,4 +18,5 @@ export const importMap = {
   "@/components/admin/Icon#Icon": Icon,
   "@/components/admin/AccountLinks#AccountLinks": AccountLinks,
   "@/components/admin/LoginIntro#LoginIntro": LoginIntro,
+  "@/components/admin/DashboardWelcome#DashboardWelcome": DashboardWelcome,
 };
