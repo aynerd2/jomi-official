@@ -30,6 +30,8 @@ export type Message = {
   content: string;
   type?: "answer" | "action_plan" | "error" | "welcome";
   references?: Reference[];
+  // Action plans only: what the plan is about, for the calendar reminder.
+  topic?: string;
 };
 
 type ChatResponse = {
@@ -64,13 +66,56 @@ function getOrCreateUserId(): string {
   }
 }
 
+export class ShepherdApiError extends Error {
+  constructor(
+    path: string,
+    readonly status: number,
+  ) {
+    super(`Shepherd ${path} failed: ${status}`);
+  }
+}
+
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
-  if (!res.ok) throw new Error(`Shepherd ${path} failed: ${res.status}`);
+  if (!res.ok) throw new ShepherdApiError(path, res.status);
   return res.json() as Promise<T>;
+}
+
+export type CalendarLinks = { icsUrl: string; googleUrl: string };
+
+// Keeps the request comfortably under common URL limits.
+const MAX_CALENDAR_URL = 1800;
+
+// The backend turns a plan into a daily calendar event; the visitor's own
+// calendar then sends the alert. `start` must be a local YYYY-MM-DD date.
+export async function getCalendarLinks(opts: {
+  topic: string;
+  hour: number;
+  minute: number;
+  steps: string[];
+  start: string;
+}): Promise<CalendarLinks> {
+  const steps = opts.steps.slice(0, 6);
+  const build = () => {
+    const params = new URLSearchParams({
+      topic: opts.topic.slice(0, 80),
+      hour: String(opts.hour),
+      minute: String(opts.minute),
+      start: opts.start,
+    });
+    if (steps.length) params.set("steps", steps.join("|"));
+    return `/calendar/links?${params}`;
+  };
+  let path = build();
+  while (steps.length && API_URL.length + path.length > MAX_CALENDAR_URL) {
+    steps.pop();
+    path = build();
+  }
+  const res = await api<{ ics_path: string; google_url: string }>(path);
+  return { icsUrl: `${API_URL}${res.ics_path}`, googleUrl: res.google_url };
 }
 
 // The backend writes for Telegram, so `reply` carries "🎧 Listen: <url>" inline.
@@ -230,11 +275,13 @@ export function useShepherd() {
           body: JSON.stringify({ user_id: userId, message, want_audio: false }),
         });
         const { text, references } = splitReply(res.reply, res.references);
+        const isPlan = res.type === "action_plan";
         append({
           role: "assistant",
-          type: res.type === "action_plan" ? "action_plan" : "answer",
+          type: isPlan ? "action_plan" : "answer",
           content: text,
           references,
+          topic: isPlan ? message.replace(/^\/plan\s+/i, "").slice(0, 80) : undefined,
         });
         playReceived();
       } catch {

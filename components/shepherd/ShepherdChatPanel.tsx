@@ -1,19 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import {
   ArrowUp,
+  BellRing,
+  CalendarPlus,
   CheckCircle2,
   Globe,
   Headphones,
   ListChecks,
+  Loader2,
   RotateCcw,
   Volume2,
   VolumeX,
   X,
 } from "lucide-react";
 
-import { LANGUAGES, type Message, type ShepherdState } from "./useShepherd";
+import {
+  LANGUAGES,
+  ShepherdApiError,
+  getCalendarLinks,
+  type CalendarLinks,
+  type Message,
+  type ShepherdState,
+} from "./useShepherd";
 
 const STARTERS = [
   "What has he said about prayer?",
@@ -288,7 +298,10 @@ function Bubble({ message }: { message: Message }) {
         }`}
       >
         {message.type === "action_plan" ? (
-          <ActionPlan text={message.content} />
+          <>
+            <ActionPlan text={message.content} />
+            <DailyReminder topic={message.topic} plan={message.content} />
+          </>
         ) : (
           <p className="whitespace-pre-line">{stripMarkdown(message.content)}</p>
         )}
@@ -340,6 +353,160 @@ function ActionPlan({ text }: { text: string }) {
           <p key={i}>{line}</p>
         ),
       )}
+    </div>
+  );
+}
+
+// The first day must come from the visitor's own calendar. toISOString() is
+// UTC and gives the wrong day for evening visitors east or west of it.
+function tomorrowLocal(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+// Checklist rows, without their markers. "|" separates steps on the wire, so
+// it can't appear inside one.
+function planSteps(text: string) {
+  return stripMarkdown(text)
+    .split("\n")
+    .filter((l) => LIST_ITEM.test(l))
+    .map((l) => l.replace(LIST_ITEM, "").replace(/\|/g, " ").replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 6);
+}
+
+type ReminderState =
+  | { step: "closed" }
+  | { step: "picking"; error?: "invalid" | "network" }
+  | { step: "loading" }
+  | { step: "done"; links: CalendarLinks; time: string };
+
+// A daily reminder via the visitor's own calendar: the site can't message them
+// or set an alarm, but a repeating calendar event alerts them every day.
+function DailyReminder({ topic, plan }: { topic?: string; plan: string }) {
+  const [state, setState] = useState<ReminderState>({ step: "closed" });
+  const [time, setTime] = useState("08:00");
+  const boxRef = useRef<HTMLDivElement>(null);
+  const inputId = useId();
+
+  // The picker opens at the bottom of a long bubble; bring it into view.
+  useEffect(() => {
+    if (state.step !== "closed") boxRef.current?.scrollIntoView({ block: "nearest" });
+  }, [state.step]);
+
+  const submit = async (e?: FormEvent) => {
+    e?.preventDefault();
+    const match = /^(\d{1,2}):(\d{2})/.exec(time);
+    const hour = match ? Number(match[1]) : NaN;
+    const minute = match ? Number(match[2]) : NaN;
+    if (!(hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59)) {
+      setState({ step: "picking", error: "invalid" });
+      return;
+    }
+    setState({ step: "loading" });
+    try {
+      const links = await getCalendarLinks({
+        topic: topic?.trim() || "Action plan",
+        hour,
+        minute,
+        steps: planSteps(plan),
+        start: tomorrowLocal(),
+      });
+      const pad = (n: number) => String(n).padStart(2, "0");
+      setState({ step: "done", links, time: `${pad(hour)}:${pad(minute)}` });
+    } catch (err) {
+      const invalid = err instanceof ShepherdApiError && err.status === 422;
+      setState({ step: "picking", error: invalid ? "invalid" : "network" });
+    }
+  };
+
+  if (state.step === "closed") {
+    return (
+      <button
+        type="button"
+        onClick={() => setState({ step: "picking" })}
+        className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-gold-200 bg-white px-3.5 py-2 text-caption font-medium text-navy-900 transition-colors hover:border-gold-500 hover:bg-gold-50"
+      >
+        <BellRing className="h-4 w-4 text-gold-600" /> Remind me daily
+      </button>
+    );
+  }
+
+  if (state.step === "done") {
+    return (
+      <div ref={boxRef} className="mt-3 space-y-2 border-t border-ink-100 pt-3">
+        <a
+          href={state.links.googleUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1.5 rounded-full bg-navy-900 px-3.5 py-2 text-caption font-medium text-white transition-colors hover:bg-navy-800"
+        >
+          <CalendarPlus className="h-4 w-4 text-gold-400" /> Add to Google Calendar
+        </a>
+        {/* No `download`: plain navigation is what brings up iOS's
+            "Add to Calendar" sheet; Android downloads and opens it. */}
+        <a
+          href={state.links.icsUrl}
+          className="flex items-center justify-center gap-1.5 rounded-full border border-gold-200 bg-white px-3.5 py-2 text-caption font-medium text-navy-900 transition-colors hover:border-gold-500 hover:bg-gold-50"
+        >
+          <CalendarPlus className="h-4 w-4 text-gold-600" /> Add to Apple, Outlook or other
+          calendar
+        </a>
+        <p className="text-caption text-ink-500">
+          Your calendar will remind you daily at {state.time} for the next 30 days.
+        </p>
+      </div>
+    );
+  }
+
+  const loading = state.step === "loading";
+  const error = state.step === "picking" ? state.error : undefined;
+  return (
+    <div ref={boxRef} className="mt-3 border-t border-ink-100 pt-3">
+      <form onSubmit={submit} className="space-y-2">
+        <label htmlFor={inputId} className="eyebrow block">
+          Remind me daily at
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            id={inputId}
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            disabled={loading}
+            required
+            // 16px on mobile stops iOS zooming into the field.
+            className="min-w-0 flex-1 rounded-full border border-ink-200 bg-white px-3.5 py-2 text-base text-ink-800 transition-colors focus:border-gold-500 focus:outline-none disabled:bg-ink-50 sm:text-body-sm"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gold-500 px-3.5 py-2 text-caption font-medium text-navy-900 transition-colors hover:bg-gold-400 disabled:opacity-60"
+          >
+            {loading && <Loader2 className="h-4 w-4 motion-safe:animate-spin" />}
+            {loading ? "Setting…" : "Set reminder"}
+          </button>
+        </div>
+        {error === "invalid" && (
+          <p role="alert" className="text-caption text-red-700">
+            Please choose a valid time.
+          </p>
+        )}
+        {error === "network" && (
+          <div role="alert" className="text-caption text-red-700">
+            <p>Something went wrong, try again.</p>
+            <button
+              type="button"
+              onClick={() => void submit()}
+              className="mt-1 inline-flex items-center gap-1.5 font-medium text-gold-700 hover:text-gold-600"
+            >
+              <RotateCcw className="h-3.5 w-3.5" /> Try again
+            </button>
+          </div>
+        )}
+      </form>
     </div>
   );
 }
