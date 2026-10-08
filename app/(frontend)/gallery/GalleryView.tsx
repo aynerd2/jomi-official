@@ -8,9 +8,16 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Section } from "@/components/ui/Section";
 import { PageHero } from "@/components/ui/PageHero";
 import { StaggerGroup, StaggerItem } from "@/components/ui/Reveal";
-import type { GalleryItem } from "@/lib/cms";
+import type { GalleryItem, PageView } from "@/lib/cms";
 
-export default function GalleryView({ images }: { images: GalleryItem[] }) {
+export default function GalleryView({
+  images,
+  page,
+}: {
+  images: GalleryItem[];
+  page: PageView<"gallery">;
+}) {
+  const { hero } = page;
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const reduceMotion = useReducedMotion();
 
@@ -48,9 +55,11 @@ export default function GalleryView({ images }: { images: GalleryItem[] }) {
 
       <main>
         <PageHero
-          eyebrow="Gallery"
-          title="Moments from the ministry"
-          lede="Services, conferences and outreaches, as the Lord has led us across cities and nations."
+          eyebrow={hero.eyebrow}
+          title={hero.title}
+          lede={hero.lede}
+          image={hero.image}
+          imageAlt={hero.imageAlt}
         />
 
         <Section tone="muted">

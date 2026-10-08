@@ -1,13 +1,16 @@
 import type { GlobalConfig } from "payload";
 
 import { anyone, isEditor } from "../access/roles";
+import { sectionCopyField } from "../fields/sectionCopy";
+import { homeBands, homeHero, homeSections } from "../../content/pages";
 
 export const HomePage: GlobalConfig = {
   slug: "home",
   label: "Home page",
   admin: {
     group: "Settings",
-    description: "The hero and the section headings on the home page.",
+    description:
+      "The hero, the section headings and the bands on the home page. Anything left empty shows the original wording.",
   },
   access: {
     read: anyone,
@@ -18,22 +21,26 @@ export const HomePage: GlobalConfig = {
       name: "hero",
       type: "group",
       fields: [
-        { name: "eyebrow", type: "text", defaultValue: "Welcome to JOMI" },
+        { name: "eyebrow", type: "text", defaultValue: homeHero.eyebrow },
         {
           name: "headline",
           type: "text",
           required: true,
+          defaultValue: homeHero.headline,
           admin: {
             description:
               "Wrap the words that should appear in gold with *asterisks*, e.g. Glorifying the *Finished Works* of Christ.",
           },
         },
-        { name: "lede", type: "textarea", required: true },
+        { name: "lede", type: "textarea", required: true, defaultValue: homeHero.lede },
         {
           name: "portrait",
           type: "upload",
           relationTo: "media",
-          admin: { description: "The portrait beside the headline." },
+          admin: {
+            description:
+              "The portrait beside the headline. Left empty, the first leader's photo is used.",
+          },
         },
         {
           type: "row",
@@ -41,13 +48,13 @@ export const HomePage: GlobalConfig = {
             {
               name: "primaryCtaLabel",
               type: "text",
-              defaultValue: "Plan your visit",
+              defaultValue: homeHero.primaryCtaLabel,
               admin: { width: "50%" },
             },
             {
               name: "primaryCtaHref",
               type: "text",
-              defaultValue: "/contact",
+              defaultValue: homeHero.primaryCtaHref,
               admin: { width: "50%" },
             },
           ],
@@ -58,13 +65,13 @@ export const HomePage: GlobalConfig = {
             {
               name: "secondaryCtaLabel",
               type: "text",
-              defaultValue: "Watch messages",
+              defaultValue: homeHero.secondaryCtaLabel,
               admin: { width: "50%" },
             },
             {
               name: "secondaryCtaHref",
               type: "text",
-              defaultValue: "/media",
+              defaultValue: homeHero.secondaryCtaHref,
               admin: { width: "50%" },
             },
           ],
@@ -79,9 +86,9 @@ export const HomePage: GlobalConfig = {
         {
           name: "heading",
           type: "text",
-          defaultValue: "Cannot be there in person? Join us wherever you are.",
+          defaultValue: homeBands.watchOnline.heading,
         },
-        { name: "body", type: "textarea" },
+        { name: "body", type: "textarea", defaultValue: homeBands.watchOnline.body },
       ],
     },
     {
@@ -92,9 +99,20 @@ export const HomePage: GlobalConfig = {
         {
           name: "heading",
           type: "text",
-          defaultValue: "Partner with the Great Commission",
+          defaultValue: homeBands.partner.heading,
         },
-        { name: "body", type: "textarea" },
+        { name: "body", type: "textarea", defaultValue: homeBands.partner.body },
+      ],
+    },
+    {
+      name: "sections",
+      type: "group",
+      label: "Section headings",
+      fields: [
+        sectionCopyField("about", "About section", homeSections.about),
+        sectionCopyField("events", "Upcoming events section", homeSections.events),
+        sectionCopyField("testimonies", "Testimonies section", homeSections.testimonies),
+        sectionCopyField("newsletter", "Newsletter sign-up", homeSections.newsletter),
       ],
     },
   ],

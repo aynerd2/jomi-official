@@ -21,7 +21,7 @@ export function PageHero({
   eyebrow: string;
   title: ReactNode;
   lede?: string;
-  image?: StaticImageData;
+  image?: StaticImageData | string;
   imageAlt?: string;
   actions?: ReactNode;
 }) {

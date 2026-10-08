@@ -7,6 +7,7 @@
  * string, while the seed uses a next/image static import, so image fields are
  * typed to accept either.
  */
+import { cache } from "react";
 import type { StaticImageData } from "next/image";
 import type { Payload, Where } from "payload";
 
@@ -37,6 +38,16 @@ import {
   type ServiceTime,
 } from "@/content/site";
 import { testimonies as testimoniesSeed, type Testimony } from "@/content/testimonies";
+import {
+  homeBands,
+  homeHero,
+  homeSections,
+  pages as pagesSeed,
+  type HomeSectionKey,
+  type PageCopy,
+  type PageKey,
+  type SectionCopy,
+} from "@/content/pages";
 
 export type ImageSource = StaticImageData | string | undefined;
 
@@ -547,4 +558,149 @@ export async function getGiving(): Promise<GivingContent> {
       ],
     },
   );
+}
+
+/* ------------------------------------------------------- page headings */
+
+export type SectionView = {
+  eyebrow: string;
+  title: string;
+  lede: string;
+  image?: ImageSource;
+  imageAlt: string;
+};
+
+/**
+ * A section's copy from the CMS, field by field over the default, so an empty
+ * field shows the original wording rather than a blank heading.
+ */
+function sectionView(cms: unknown, fallback: SectionCopy): SectionView {
+  const doc = (cms && typeof cms === "object" ? cms : {}) as Doc;
+  const uploaded = imageUrl(doc.image);
+
+  return {
+    eyebrow: clean(doc.eyebrow) || fallback.eyebrow,
+    title: clean(doc.title) || fallback.title,
+    lede: clean(doc.lede) || fallback.lede,
+    image: uploaded ?? (fallback.imageFile ? seedImage(fallback.imageFile) : undefined),
+    imageAlt:
+      (uploaded && typeof doc.image?.alt === "string" ? doc.image.alt : "") ||
+      fallback.imageAlt ||
+      "",
+  };
+}
+
+type SectionViews<T> = { [K in keyof T]: SectionView };
+
+export type PageView<K extends PageKey> = {
+  metaDescription: string;
+  hero: SectionView;
+  sections: SectionViews<(typeof pagesSeed)[K]["sections"]>;
+};
+
+function pageView<K extends PageKey>(key: K, cms: Doc | undefined): PageView<K> {
+  const seed: PageCopy = pagesSeed[key];
+  const doc = cms ?? {};
+
+  return {
+    metaDescription: clean(doc.metaDescription) || seed.metaDescription,
+    hero: sectionView(doc.hero, seed.hero),
+    sections: Object.fromEntries(
+      Object.entries(seed.sections).map(([name, copy]) => [
+        name,
+        sectionView(doc[name], copy),
+      ]),
+    ) as PageView<K>["sections"],
+  };
+}
+
+/** One read of the Page content global per request, however many pages ask. */
+const getPagesGlobal = cache(() =>
+  fromCms<Doc | undefined>(
+    "page content",
+    (payload) =>
+      payload.findGlobal({
+        slug: "pages",
+        overrideAccess: false,
+        depth: 1,
+      }) as Promise<Doc>,
+    undefined,
+  ),
+);
+
+export async function getPage<K extends PageKey>(key: K): Promise<PageView<K>> {
+  const doc = await getPagesGlobal();
+  return pageView(key, doc?.[key] as Doc | undefined);
+}
+
+/* ------------------------------------------------------------ home page */
+
+export type HomeContent = {
+  hero: {
+    eyebrow: string;
+    headline: string;
+    lede: string;
+    portrait?: ImageSource;
+    portraitAlt: string;
+    primaryCta: { label: string; href: string };
+    secondaryCta: { label: string; href: string };
+  };
+  watchOnline: { heading: string; body: string };
+  partnerBand: { heading: string; body: string };
+  sections: SectionViews<typeof homeSections>;
+};
+
+function homeView(cms: Doc | undefined): HomeContent {
+  const doc = cms ?? {};
+  const hero = (doc.hero ?? {}) as Doc;
+  const watch = (doc.watchOnline ?? {}) as Doc;
+  const partner = (doc.partnerBand ?? {}) as Doc;
+  const sections = (doc.sections ?? {}) as Doc;
+  const portrait = imageUrl(hero.portrait);
+
+  return {
+    hero: {
+      eyebrow: clean(hero.eyebrow) || homeHero.eyebrow,
+      headline: clean(hero.headline) || homeHero.headline,
+      lede: clean(hero.lede) || homeHero.lede,
+      portrait,
+      portraitAlt: portrait && typeof hero.portrait?.alt === "string" ? hero.portrait.alt : "",
+      primaryCta: {
+        label: clean(hero.primaryCtaLabel) || homeHero.primaryCtaLabel,
+        href: clean(hero.primaryCtaHref) || homeHero.primaryCtaHref,
+      },
+      secondaryCta: {
+        label: clean(hero.secondaryCtaLabel) || homeHero.secondaryCtaLabel,
+        href: clean(hero.secondaryCtaHref) || homeHero.secondaryCtaHref,
+      },
+    },
+    watchOnline: {
+      heading: clean(watch.heading) || homeBands.watchOnline.heading,
+      body: clean(watch.body) || homeBands.watchOnline.body,
+    },
+    partnerBand: {
+      heading: clean(partner.heading) || homeBands.partner.heading,
+      body: clean(partner.body) || homeBands.partner.body,
+    },
+    sections: Object.fromEntries(
+      (Object.keys(homeSections) as HomeSectionKey[]).map((name) => [
+        name,
+        sectionView(sections[name], homeSections[name]),
+      ]),
+    ) as HomeContent["sections"],
+  };
+}
+
+export async function getHome(): Promise<HomeContent> {
+  const doc = await fromCms<Doc | undefined>(
+    "home page",
+    (payload) =>
+      payload.findGlobal({
+        slug: "home",
+        overrideAccess: false,
+        depth: 1,
+      }) as Promise<Doc>,
+    undefined,
+  );
+  return homeView(doc);
 }

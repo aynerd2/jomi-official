@@ -9,7 +9,13 @@ import { initialFormState } from "@/lib/form-state";
 import { Section } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
 
-export default function Newsletter() {
+export default function Newsletter({
+  title,
+  lede,
+}: {
+  title: string;
+  lede: string;
+}) {
   const [state, formAction, pending] = useActionState(
     submitNewsletter,
     initialFormState,
@@ -22,14 +28,9 @@ export default function Newsletter() {
           <Mail className="h-5 w-5" />
         </span>
 
-        <h2 className="mt-6 text-h2 text-navy-900 text-balance">
-          Stay connected with the move of God
-        </h2>
+        <h2 className="mt-6 text-h2 text-navy-900 text-balance">{title}</h2>
         <div className="rule mx-auto mt-5" />
-        <p className="mt-5 text-body-lg text-ink-600">
-          Be the first to hear about upcoming services, conferences and new
-          releases from the ministry.
-        </p>
+        <p className="mt-5 text-body-lg text-ink-600">{lede}</p>
 
         <form
           action={formAction}

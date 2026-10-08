@@ -19,19 +19,21 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/ui/Reveal";
 import { StatCounter } from "@/components/ui/StatCounter";
 
-import heroPhoto from "@/assets/images/Partner.jpg";
 import { GivingForm } from "./GivingForm";
-import type { GivingContent, SiteSettingsView } from "@/lib/cms";
+import type { GivingContent, PageView, SiteSettingsView } from "@/lib/cms";
 
 const impactIcons = [Globe, Users, Zap];
 
 export default function PartnerView({
   giving,
   settings,
+  page,
 }: {
   giving: GivingContent;
   settings: SiteSettingsView;
+  page: PageView<"partner">;
 }) {
+  const { hero, sections } = page;
   const {
     bankAccount,
     impactAreas,
@@ -58,11 +60,11 @@ export default function PartnerView({
 
       <main>
         <PageHero
-          eyebrow="Partnership"
-          title="Multiply your impact"
-          lede="Your partnership enables us to reach more nations, train more leaders, and take the gospel further."
-          image={heroPhoto}
-          imageAlt="Ministry partners gathered together"
+          eyebrow={hero.eyebrow}
+          title={hero.title}
+          lede={hero.lede}
+          image={hero.image}
+          imageAlt={hero.imageAlt}
           actions={
             <>
               <Link href="#give" className="btn-primary">
@@ -79,8 +81,9 @@ export default function PartnerView({
         {/* Where your seed goes */}
         <Section tone="muted">
           <SectionHeading
-            eyebrow="Your giving at work"
-            title="Where your seed goes"
+            eyebrow={sections.impactAreas.eyebrow}
+            title={sections.impactAreas.title}
+            lede={sections.impactAreas.lede}
           />
 
           <StaggerGroup className="mt-14 grid gap-6 md:grid-cols-3">
@@ -198,9 +201,9 @@ export default function PartnerView({
         {/* Monthly partnership */}
         <Section tone="muted">
           <SectionHeading
-            eyebrow="Go further"
-            title="Become a monthly partner"
-            lede="Monthly partners carry this work with us, in prayer and in giving."
+            eyebrow={sections.monthly.eyebrow}
+            title={sections.monthly.title}
+            lede={sections.monthly.lede}
           />
 
           {partnerTiers.length === 0 ? (
@@ -250,8 +253,9 @@ export default function PartnerView({
         {impactStats.length > 0 && (
         <Section tone="navy">
           <SectionHeading
-            eyebrow="Impact"
-            title="Your partnership in numbers"
+            eyebrow={sections.impactStats.eyebrow}
+            title={sections.impactStats.title}
+            lede={sections.impactStats.lede}
             tone="dark"
           />
 

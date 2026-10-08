@@ -26,13 +26,18 @@ import { Container, Section, SectionHeading } from "@/components/ui/Section";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/ui/Reveal";
 import { fadeInLeft, fadeInRight, fadeUp } from "@/lib/motion";
 
-import aboutPhoto from "@/assets/images/Daddy1.jpg";
 import { isUpcoming, type JomiEvent } from "@/content/events";
-import type { AboutContent, LeaderView, SiteSettingsView } from "@/lib/cms";
+import type {
+  AboutContent,
+  HomeContent,
+  LeaderView,
+  SiteSettingsView,
+} from "@/lib/cms";
 import type { ServiceTime } from "@/content/site";
 
 type HomeViewProps = {
   today: string;
+  home: HomeContent;
   events: JomiEvent[];
   about: AboutContent;
   leaders: LeaderView[];
@@ -42,6 +47,7 @@ type HomeViewProps = {
 
 export default function HomeView({
   today,
+  home,
   events,
   about,
   leaders,
@@ -64,6 +70,8 @@ export default function HomeView({
   );
   const weeklyServices = serviceTimes.filter((s) => s.cadence === "Weekly");
   const apostle = leaders[0];
+  const { hero, sections } = home;
+  const portrait = hero.portrait ?? apostle?.photo;
 
   return (
     <>
@@ -84,27 +92,24 @@ export default function HomeView({
                 animate={reduceMotion ? undefined : "visible"}
                 variants={fadeInLeft}
               >
-                <p className="eyebrow">Welcome to JOMI</p>
+                <p className="eyebrow">{hero.eyebrow}</p>
 
                 <h1 className="mt-5 text-display text-navy-900 text-balance">
-                  Glorifying the{" "}
-                  <span className="text-gold-600">Finished Works</span> of Christ
+                  <Headline text={hero.headline} />
                 </h1>
 
                 <p className="mt-6 max-w-xl text-body-lg text-ink-600">
-                  A global movement revealing the fullness of Christ and raising
-                  a triumphant generation that walks in dominion, grace and
-                  apostolic authority.
+                  {hero.lede}
                 </p>
 
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                  <Link href="/contact" className="btn-primary">
-                    Plan your visit
+                  <Link href={hero.primaryCta.href} className="btn-primary">
+                    {hero.primaryCta.label}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
-                  <Link href="/media" className="btn-secondary">
+                  <Link href={hero.secondaryCta.href} className="btn-secondary">
                     <Play className="h-4 w-4" />
-                    Watch messages
+                    {hero.secondaryCta.label}
                   </Link>
                 </div>
 
@@ -136,10 +141,13 @@ export default function HomeView({
                 >
                   <div className="absolute -right-5 -top-5 h-full w-full rounded-[2rem] border border-gold-300" />
                   <div className="relative h-full w-full overflow-hidden rounded-[2rem] bg-surface-sunken">
-                    {apostle?.photo && (
+                    {portrait && (
                       <Image
-                        src={apostle.photo}
-                        alt={`${apostle.name}, ${apostle.role}`}
+                        src={portrait}
+                        alt={
+                          hero.portraitAlt ||
+                          (apostle ? `${apostle.name}, ${apostle.role}` : "")
+                        }
                         fill
                         priority
                         sizes="(max-width: 1024px) 100vw, 460px"
@@ -193,14 +201,16 @@ export default function HomeView({
         <Section>
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
             <Reveal variants={fadeInLeft} className="order-2 lg:order-1">
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2rem]">
-                <Image
-                  src={aboutPhoto}
-                  alt="Apostle Jide Ojo ministering"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                />
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[2rem] bg-surface-sunken">
+                {sections.about.image && (
+                  <Image
+                    src={sections.about.image}
+                    alt={sections.about.imageAlt}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
+                  />
+                )}
               </div>
               <div className="relative -mt-16 ml-auto mr-4 max-w-sm rounded-2xl border border-ink-100 bg-white p-6 shadow-lift">
                 <Quote className="h-6 w-6 text-gold-500" />
@@ -211,9 +221,9 @@ export default function HomeView({
             </Reveal>
 
             <Reveal variants={fadeInRight} className="order-1 lg:order-2">
-              <p className="eyebrow">About the ministry</p>
+              <p className="eyebrow">{sections.about.eyebrow}</p>
               <h2 className="mt-3 text-h2 text-navy-900 text-balance">
-                Revealing Christ to the nations
+                {sections.about.title}
               </h2>
               <div className="rule mt-5" />
 
@@ -236,9 +246,9 @@ export default function HomeView({
         {/* Upcoming events */}
         <Section tone="muted" id="events">
           <SectionHeading
-            eyebrow="What's on"
-            title="Join us at our next gathering"
-            lede="Services, conferences, seminars and apostolic missions through the year."
+            eyebrow={sections.events.eyebrow}
+            title={sections.events.title}
+            lede={sections.events.lede}
           />
 
           {nextEvents.length > 0 ? (
@@ -268,14 +278,19 @@ export default function HomeView({
         </Section>
 
         {/* Watch online — navy band, live embed once a stream URL is set */}
-        <LivestreamBand settings={settings} serviceTimes={serviceTimes} />
+        <LivestreamBand
+          settings={settings}
+          serviceTimes={serviceTimes}
+          heading={home.watchOnline.heading}
+          body={home.watchOnline.body}
+        />
 
         {/* Testimonies invitation */}
         <Section>
           <SectionHeading
-            eyebrow="Testimonies"
-            title="What God has done"
-            lede="We are gathering testimonies from across the nations. If the Lord has met you through this ministry, we would love to hear your story."
+            eyebrow={sections.testimonies.eyebrow}
+            title={sections.testimonies.title}
+            lede={sections.testimonies.lede}
           />
           <Reveal className="mt-10 text-center">
             <Link href="/testimonies" className="btn-primary">
@@ -291,12 +306,11 @@ export default function HomeView({
             <Reveal variants={fadeUp} className="lg:col-span-7">
               <p className="eyebrow text-gold-400">Partnership</p>
               <h2 className="mt-3 text-h2 text-white text-balance">
-                Partner with the Great Commission
+                {home.partnerBand.heading}
               </h2>
               <div className="rule mt-5" />
               <p className="mt-6 max-w-xl text-body-lg text-navy-200">
-                Your partnership takes the gospel to unreached nations, trains
-                leaders, and demonstrates the love of Christ to a hurting world.
+                {home.partnerBand.body}
               </p>
             </Reveal>
 
@@ -313,8 +327,28 @@ export default function HomeView({
           </div>
         </Section>
 
-        <Newsletter />
+        <Newsletter
+          title={sections.newsletter.title}
+          lede={sections.newsletter.lede}
+        />
       </main>
+    </>
+  );
+}
+
+/** The hero headline, with the *asterisked* words set in gold. */
+function Headline({ text }: { text: string }) {
+  return (
+    <>
+      {text.split("*").map((part, index) =>
+        index % 2 === 1 ? (
+          <span key={index} className="text-gold-600">
+            {part}
+          </span>
+        ) : (
+          part
+        ),
+      )}
     </>
   );
 }

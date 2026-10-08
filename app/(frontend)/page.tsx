@@ -3,6 +3,7 @@ import { todayInLagos } from "@/content/events";
 import {
   getAbout,
   getEvents,
+  getHome,
   getLeadership,
   getServiceTimes,
   getSiteSettings,
@@ -13,7 +14,8 @@ import {
 export const revalidate = 3600;
 
 export default async function Home() {
-  const [events, about, leaders, serviceTimes, settings] = await Promise.all([
+  const [home, events, about, leaders, serviceTimes, settings] = await Promise.all([
+    getHome(),
     getEvents(),
     getAbout(),
     getLeadership(),
@@ -24,6 +26,7 @@ export default async function Home() {
   return (
     <HomeView
       today={todayInLagos()}
+      home={home}
       events={events}
       about={about}
       leaders={leaders}

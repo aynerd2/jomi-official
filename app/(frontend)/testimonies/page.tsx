@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import TestimoniesView from "./TestimoniesView";
-import { getTestimonies } from "@/lib/cms";
+import { getPage, getTestimonies } from "@/lib/cms";
 
-export const metadata: Metadata = {
-  title: "Testimonies",
-  description:
-    "Testimonies of salvation, healing and restoration through Jide Ojo Ministry International.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPage("testimonies");
+  return { title: "Testimonies", description: page.metaDescription };
+}
 
 export default async function TestimoniesPage() {
-  const testimonies = await getTestimonies();
-  return <TestimoniesView testimonies={testimonies} />;
+  const [testimonies, page] = await Promise.all([
+    getTestimonies(),
+    getPage("testimonies"),
+  ]);
+  return <TestimoniesView testimonies={testimonies} page={page} />;
 }

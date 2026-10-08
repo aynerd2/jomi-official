@@ -30,7 +30,9 @@ import { Users } from "./payload/collections/Users";
 import { About } from "./payload/globals/About";
 import { Giving } from "./payload/globals/Giving";
 import { HomePage } from "./payload/globals/HomePage";
+import { PageContent } from "./payload/globals/PageContent";
 import { SiteSettings } from "./payload/globals/SiteSettings";
+import { revalidatesSite, revalidatesSiteGlobal } from "./payload/hooks/revalidate";
 
 // Some networks refuse the SRV lookups an Atlas mongodb+srv:// URI depends on,
 // while ordinary DNS works fine. Setting MONGODB_DNS_SERVERS (e.g. "1.1.1.1")
@@ -71,26 +73,33 @@ export default buildConfig({
     },
   },
 
+  // Everything the public site shows refreshes it when saved (see
+  // payload/hooks/revalidate.ts). Submissions, donations and users never
+  // appear on the site, so they are left alone.
   collections: [
     // Content
-    Events,
-    Sermons,
-    Books,
-    GalleryImages,
-    Leadership,
-    MinistryArms,
-    Branches,
-    ServiceTimes,
-    // Submissions
-    Testimonies,
+    ...[
+      Events,
+      Sermons,
+      Books,
+      GalleryImages,
+      Leadership,
+      MinistryArms,
+      Branches,
+      ServiceTimes,
+    ].map(revalidatesSite),
+    // Submissions (testimonies appear on the site once approved)
+    revalidatesSite(Testimonies),
     Submissions,
     Donations,
-    // Administration
-    Media,
+    // Administration (a replaced photo or new alt text shows on the site)
+    revalidatesSite(Media),
     Users,
   ],
 
-  globals: [HomePage, About, SiteSettings, Giving],
+  globals: [HomePage, PageContent, About, SiteSettings, Giving].map(
+    revalidatesSiteGlobal,
+  ),
 
   plugins: [
     // Uploads go to Cloudinary when its credentials are present. Without them

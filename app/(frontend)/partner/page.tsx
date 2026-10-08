@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import PartnerView from "./PartnerView";
-import { getGiving, getSiteSettings } from "@/lib/cms";
+import { getGiving, getPage, getSiteSettings } from "@/lib/cms";
 
-export const metadata: Metadata = {
-  title: "Partner with Us",
-  description:
-    "Support the mission of Jide Ojo Ministry International through giving and monthly partnership.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPage("partner");
+  return { title: "Partner with Us", description: page.metaDescription };
+}
 
 export default async function PartnerPage() {
-  const [giving, settings] = await Promise.all([getGiving(), getSiteSettings()]);
-  return <PartnerView giving={giving} settings={settings} />;
+  const [giving, settings, page] = await Promise.all([
+    getGiving(),
+    getSiteSettings(),
+    getPage("partner"),
+  ]);
+  return <PartnerView giving={giving} settings={settings} page={page} />;
 }

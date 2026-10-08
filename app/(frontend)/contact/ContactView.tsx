@@ -23,21 +23,23 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/ui/Reveal";
 import { fadeInLeft, fadeInRight } from "@/lib/motion";
 
-import heroPhoto from "@/assets/images/Daddy3.jpg";
 import type { Branch, ServiceTime } from "@/content/site";
-import type { SiteSettingsView } from "@/lib/cms";
+import type { PageView, SiteSettingsView } from "@/lib/cms";
 
 export default function ContactView({
   settings,
   serviceTimes,
   branches,
   fullAddress,
+  page,
 }: {
   settings: SiteSettingsView;
   serviceTimes: ServiceTime[];
   branches: Branch[];
   fullAddress: string;
+  page: PageView<"contact">;
 }) {
+  const { hero, sections } = page;
   const [tab, setTab] = useState<"general" | "prayer">("general");
   const [state, formAction, pending] = useActionState(
     submitContact,
@@ -58,11 +60,11 @@ export default function ContactView({
 
       <main>
         <PageHero
-          eyebrow="Contact"
-          title="Get in touch"
-          lede="We would love to hear from you. Reach out for enquiries, prayer requests, or ministry engagements."
-          image={heroPhoto}
-          imageAlt="Apostle Jide Ojo greeting the congregation"
+          eyebrow={hero.eyebrow}
+          title={hero.title}
+          lede={hero.lede}
+          image={hero.image}
+          imageAlt={hero.imageAlt}
           actions={
             <>
               <Link href="#message" className="btn-primary">
@@ -139,9 +141,9 @@ export default function ContactView({
         {/* Service times */}
         <Section>
           <SectionHeading
-            eyebrow="Plan your visit"
-            title="Service times"
-            lede="Join us in person or online. All times are West Africa Time (WAT)."
+            eyebrow={sections.serviceTimes.eyebrow}
+            title={sections.serviceTimes.title}
+            lede={sections.serviceTimes.lede}
           />
 
           <StaggerGroup className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">

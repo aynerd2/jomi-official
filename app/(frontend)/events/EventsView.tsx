@@ -9,7 +9,7 @@ import { Section } from "@/components/ui/Section";
 import { PageHero } from "@/components/ui/PageHero";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/ui/Reveal";
 import { eventTypes, isUpcoming, type JomiEvent } from "@/content/events";
-import heroPhoto from "@/assets/images/audience.jpg";
+import type { PageView } from "@/lib/cms";
 
 /** Groups events under "January 2026" style headings, in calendar order. */
 function groupByMonth(events: JomiEvent[]) {
@@ -30,10 +30,13 @@ function groupByMonth(events: JomiEvent[]) {
 export default function EventsView({
   today,
   events,
+  page,
 }: {
   today: string;
   events: JomiEvent[];
+  page: PageView<"events">;
 }) {
+  const { hero } = page;
   const [type, setType] = useState("all");
   const [country, setCountry] = useState("All");
   const [query, setQuery] = useState("");
@@ -80,11 +83,11 @@ export default function EventsView({
 
       <main>
         <PageHero
-          eyebrow="Ministry calendar"
-          title="Come and be part of what God is doing"
-          lede="Services, conferences, seminars and apostolic missions through the year. Everyone is welcome."
-          image={heroPhoto}
-          imageAlt="Congregation gathered in worship"
+          eyebrow={hero.eyebrow}
+          title={hero.title}
+          lede={hero.lede}
+          image={hero.image}
+          imageAlt={hero.imageAlt}
         />
 
         <Section tone="muted">

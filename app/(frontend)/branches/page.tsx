@@ -5,25 +5,27 @@ import { ArrowRight, MapPin } from "lucide-react";
 import { Section } from "@/components/ui/Section";
 import { PageHero } from "@/components/ui/PageHero";
 import { StaggerGroup, StaggerItem } from "@/components/ui/Reveal";
-import { getBranches } from "@/lib/cms";
+import { getBranches, getPage } from "@/lib/cms";
 
-export const metadata: Metadata = {
-  title: "Our Centres",
-  description:
-    "Where Jide Ojo Ministry International gathers across Nigeria: Abuja, Lagos, Ibadan, Akure, Osogbo and Ado-Ekiti.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPage("branches");
+  return { title: "Our Centres", description: page.metaDescription };
+}
 
 export default async function BranchesPage() {
-  const branches = await getBranches();
+  const [branches, page] = await Promise.all([getBranches(), getPage("branches")]);
+  const { hero } = page;
 
   return (
     <>
 
       <main>
         <PageHero
-          eyebrow="Our centres"
-          title="Where we gather"
-          lede="The ministry gathers across Nigeria and travels for apostolic missions through the year. Find the centre nearest you."
+          eyebrow={hero.eyebrow}
+          title={hero.title}
+          lede={hero.lede}
+          image={hero.image}
+          imageAlt={hero.imageAlt}
         />
 
         <Section tone="muted">

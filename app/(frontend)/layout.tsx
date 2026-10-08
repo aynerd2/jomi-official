@@ -19,6 +19,12 @@ const inter = Inter({
   display: "swap",
 });
 
+// Saving in the admin refreshes the site straight away (payload/hooks/
+// revalidate.ts). This is the safety net for anything that bypasses those
+// hooks, such as an edit made directly in the database: no page is ever more
+// than a minute behind the CMS.
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: {
     default: "Jide Ojo Ministry International | Glorifying the Finished Works of Christ",

@@ -3,21 +3,22 @@ import ContactView from "./ContactView";
 import {
   formatAddress,
   getBranches,
+  getPage,
   getServiceTimes,
   getSiteSettings,
 } from "@/lib/cms";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description:
-    "Service times, locations and how to reach Jide Ojo Ministry International for enquiries, prayer requests and ministry engagements.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPage("contact");
+  return { title: "Contact", description: page.metaDescription };
+}
 
 export default async function ContactPage() {
-  const [settings, serviceTimes, branches] = await Promise.all([
+  const [settings, serviceTimes, branches, page] = await Promise.all([
     getSiteSettings(),
     getServiceTimes(),
     getBranches(),
+    getPage("contact"),
   ]);
 
   return (
@@ -26,6 +27,7 @@ export default async function ContactPage() {
       serviceTimes={serviceTimes}
       branches={branches}
       fullAddress={formatAddress(settings)}
+      page={page}
     />
   );
 }

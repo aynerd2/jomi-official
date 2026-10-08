@@ -9,36 +9,35 @@ import { Reveal, StaggerGroup, StaggerItem } from "@/components/ui/Reveal";
 import { Accordion } from "@/components/ui/Accordion";
 import { fadeInLeft, fadeInRight } from "@/lib/motion";
 
-import historyPhoto from "@/assets/images/Jomi_Start.jpg";
-import heroPhoto from "@/assets/images/apostle-and-pastor-ojo.webp";
-import { getAbout, getLeadership, getMinistryArms } from "@/lib/cms";
+import { getAbout, getLeadership, getMinistryArms, getPage } from "@/lib/cms";
 
-export const metadata: Metadata = {
-  title: "About",
-  description:
-    "The history, mandate, leadership, ministry arms and beliefs of Jide Ojo Ministry International.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getPage("about");
+  return { title: "About", description: page.metaDescription };
+}
 
 const mandateIcons = [Globe, Users, Heart];
 const focusIcons = [Book, Users, Heart, Globe];
 
 export default async function AboutPage() {
-  const [about, leadership, ministryArms] = await Promise.all([
+  const [about, leadership, ministryArms, page] = await Promise.all([
     getAbout(),
     getLeadership(),
     getMinistryArms(),
+    getPage("about"),
   ]);
+  const { hero, sections } = page;
 
   return (
     <>
 
       <main>
         <PageHero
-          eyebrow="About us"
-          title="Unveiling the glory of God"
-          lede="An apostolic movement committed to revealing Christ and raising a triumphant generation in every nation."
-          image={heroPhoto}
-          imageAlt="Apostle Jide Ojo and Pastor Funmi Ojo"
+          eyebrow={hero.eyebrow}
+          title={hero.title}
+          lede={hero.lede}
+          image={hero.image}
+          imageAlt={hero.imageAlt}
           actions={
             <>
               <Link href="/contact" className="btn-primary">
@@ -56,21 +55,23 @@ export default async function AboutPage() {
         <Section tone="muted">
           <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-20">
             <Reveal variants={fadeInLeft}>
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem]">
-                <Image
-                  src={historyPhoto}
-                  alt="The early days of Jide Ojo Ministry International"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                />
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2rem] bg-surface-sunken">
+                {sections.history.image && (
+                  <Image
+                    src={sections.history.image}
+                    alt={sections.history.imageAlt}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
+                  />
+                )}
               </div>
             </Reveal>
 
             <Reveal variants={fadeInRight}>
-              <p className="eyebrow">Our history</p>
+              <p className="eyebrow">{sections.history.eyebrow}</p>
               <h2 className="mt-3 text-h2 text-navy-900 text-balance">
-                How JOMI was born
+                {sections.history.title}
               </h2>
               <div className="rule mt-5" />
 
@@ -88,9 +89,9 @@ export default async function AboutPage() {
         {/* Leadership */}
         <Section>
           <SectionHeading
-            eyebrow="Leadership"
-            title="Apostolic leadership"
-            lede="Guided by the Spirit to shepherd God's people into their inheritance."
+            eyebrow={sections.leadership.eyebrow}
+            title={sections.leadership.title}
+            lede={sections.leadership.lede}
           />
 
           <StaggerGroup className="mx-auto mt-14 grid max-w-5xl gap-8 md:grid-cols-2">
@@ -137,8 +138,9 @@ export default async function AboutPage() {
         {/* Mandate — navy band */}
         <Section tone="navy">
           <SectionHeading
-            eyebrow="Our mandate"
-            title="What we are sent to do"
+            eyebrow={sections.mandate.eyebrow}
+            title={sections.mandate.title}
+            lede={sections.mandate.lede || undefined}
             tone="dark"
           />
 
@@ -165,8 +167,9 @@ export default async function AboutPage() {
         {/* Ministry focus */}
         <Section>
           <SectionHeading
-            eyebrow="Ministry focus"
-            title="How we build the body of Christ"
+            eyebrow={sections.ministryFocus.eyebrow}
+            title={sections.ministryFocus.title}
+            lede={sections.ministryFocus.lede || undefined}
           />
 
           <StaggerGroup className="mx-auto mt-14 grid max-w-5xl gap-x-12 gap-y-10 md:grid-cols-2">
@@ -192,9 +195,9 @@ export default async function AboutPage() {
         {/* Ministry arms — anchors for the nav dropdown */}
         <Section tone="muted" id="arms">
           <SectionHeading
-            eyebrow="Our ministries"
-            title="The arms of JOMI"
-            lede="The ministry serves through a number of arms, each with its own focus and gathering."
+            eyebrow={sections.arms.eyebrow}
+            title={sections.arms.title}
+            lede={sections.arms.lede}
           />
 
           <StaggerGroup className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -232,8 +235,8 @@ export default async function AboutPage() {
         <Section>
           <div className="grid gap-14 lg:grid-cols-2 lg:gap-20">
             <Reveal variants={fadeInLeft}>
-              <p className="eyebrow">What we believe</p>
-              <h2 className="mt-3 text-h2 text-navy-900">Our beliefs</h2>
+              <p className="eyebrow">{sections.beliefs.eyebrow}</p>
+              <h2 className="mt-3 text-h2 text-navy-900">{sections.beliefs.title}</h2>
               <div className="rule mt-5" />
               <div className="mt-6">
                 <Accordion items={about.beliefs} idPrefix="belief" />
@@ -241,8 +244,8 @@ export default async function AboutPage() {
             </Reveal>
 
             <Reveal variants={fadeInRight}>
-              <p className="eyebrow">How we carry it</p>
-              <h2 className="mt-3 text-h2 text-navy-900">Our core values</h2>
+              <p className="eyebrow">{sections.values.eyebrow}</p>
+              <h2 className="mt-3 text-h2 text-navy-900">{sections.values.title}</h2>
               <div className="rule mt-5" />
               <div className="mt-6">
                 <Accordion items={about.values} idPrefix="value" />

@@ -12,14 +12,17 @@ import { Section, SectionHeading } from "@/components/ui/Section";
 import { PageHero } from "@/components/ui/PageHero";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/ui/Reveal";
 
-import heroPhoto from "@/assets/images/Testimony.jpg";
 import { testimonyCategories, type Testimony } from "@/content/testimonies";
+import type { PageView } from "@/lib/cms";
 
 export default function TestimoniesView({
   testimonies,
+  page,
 }: {
   testimonies: Testimony[];
+  page: PageView<"testimonies">;
 }) {
+  const { hero, sections } = page;
   const [showForm, setShowForm] = useState(false);
   const [state, formAction, pending] = useActionState(
     submitTestimony,
@@ -51,11 +54,11 @@ export default function TestimoniesView({
 
       <main>
         <PageHero
-          eyebrow="Testimonies"
-          title="Give glory to God"
-          lede="Testimonies of salvation, healing and restoration from those the Lord has touched through this ministry."
-          image={heroPhoto}
-          imageAlt="Worshippers with hands raised"
+          eyebrow={hero.eyebrow}
+          title={hero.title}
+          lede={hero.lede}
+          image={hero.image}
+          imageAlt={hero.imageAlt}
           actions={
             <button
               type="button"
@@ -161,8 +164,9 @@ export default function TestimoniesView({
           ) : (
             <>
               <SectionHeading
-                eyebrow="In their words"
-                title="What God has done"
+                eyebrow={sections.list.eyebrow}
+                title={sections.list.title}
+                lede={sections.list.lede}
               />
               <StaggerGroup className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {testimonies.map((testimony) => (

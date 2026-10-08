@@ -21,19 +21,21 @@ import { PageHero } from "@/components/ui/PageHero";
 import { Reveal, StaggerGroup, StaggerItem } from "@/components/ui/Reveal";
 import { fadeInLeft, fadeInRight } from "@/lib/motion";
 
-import heroPhoto from "@/assets/images/Daddy2.jpg";
 import type { Book, Sermon } from "@/content/media";
-import type { SiteSettingsView } from "@/lib/cms";
+import type { PageView, SiteSettingsView } from "@/lib/cms";
 
 export default function MediaView({
   sermons,
   books,
   settings,
+  page,
 }: {
   sermons: Sermon[];
   books: Book[];
   settings: SiteSettingsView;
+  page: PageView<"media">;
 }) {
+  const { hero, sections } = page;
   const [state, formAction, pending] = useActionState(
     submitMessageRequest,
     initialFormState,
@@ -48,11 +50,11 @@ export default function MediaView({
 
       <main>
         <PageHero
-          eyebrow="Messages & resources"
-          title="Equip yourself"
-          lede="Teaching on the finished works of Christ, worship, and written resources to build your faith."
-          image={heroPhoto}
-          imageAlt="Apostle Jide Ojo teaching"
+          eyebrow={hero.eyebrow}
+          title={hero.title}
+          lede={hero.lede}
+          image={hero.image}
+          imageAlt={hero.imageAlt}
           actions={
             <>
               <a
@@ -111,9 +113,9 @@ export default function MediaView({
           ) : (
             <>
               <SectionHeading
-                eyebrow="Messages"
-                title="Recent teaching"
-                lede="Search by topic, speaker or series."
+                eyebrow={sections.messages.eyebrow}
+                title={sections.messages.title}
+                lede={sections.messages.lede}
               />
               <StaggerGroup className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {sermons.map((sermon) => (
@@ -188,9 +190,9 @@ export default function MediaView({
         {/* Books */}
         <Section id="books">
           <SectionHeading
-            eyebrow="Publications"
-            title="Books & written teaching"
-            lede="Written teaching from Apostle Jide Ojo."
+            eyebrow={sections.publications.eyebrow}
+            title={sections.publications.title}
+            lede={sections.publications.lede}
           />
 
           <StaggerGroup className="mx-auto mt-14 grid max-w-4xl gap-6 md:grid-cols-2">
